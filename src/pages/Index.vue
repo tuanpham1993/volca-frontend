@@ -1,24 +1,32 @@
 <template>
   <q-page>
-    <q-input bottom-slots v-model="newWord" label="New" counter maxlength="12" :dense="dense">
-      <template v-slot:after>
-        <q-btn round dense flat icon="send" @click="addWord" />
-      </template>
-    </q-input>
-    <q-table
-      title="Words"
-      :data="data"
-      :columns="columns"
-      row-key="name"
-      :pagination.sync="pagination"
-    >
-      <template v-slot:body="props">
-        <q-tr :props="props">
-          <q-td key="index" :props="props">{{ props.row.index + 1 }}</q-td>
-          <q-td key="word" :props="props">{{ props.row.word }}</q-td>
-        </q-tr>
-      </template>
-    </q-table>
+    <div class="row">
+      <div class="col-2">
+        <q-input bottom-slots v-model="newWord" label="New" counter maxlength="12">
+          <template v-slot:after>
+            <q-btn round dense flat icon="send" @click="addWord" />
+          </template>
+        </q-input>
+      </div>
+      <div class="col-10">
+        <q-toggle v-model="forgotten" label="Forgotten" color="yellow" />
+        <q-toggle v-model="ignored" label="Ignored" color="green" />
+        <q-table
+          title="Words"
+          :data="data"
+          :columns="columns"
+          row-key="name"
+          :pagination.sync="pagination"
+        >
+          <template v-slot:body="props">
+            <q-tr :props="props">
+              <q-td key="index" :props="props">{{ props.row.index + 1 }}</q-td>
+              <q-td key="word" :props="props">{{ props.row.word }}</q-td>
+            </q-tr>
+          </template>
+        </q-table>
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -48,7 +56,9 @@ export default {
         }
       ],
       data: [],
-      newWord: ""
+      newWord: "",
+      forgotten: false,
+      ignored: false
     };
   },
   methods: {
@@ -68,7 +78,13 @@ export default {
     },
     async loadWord() {
       const { data } = await this.$axios.get(
-        "http://api.volca.tuanpa.wtf/words"
+        "http://api.volca.tuanpa.wtf/words",
+        {
+          params: {
+            forgotten: this.forgotten,
+            ignored: this.ignored
+          }
+        }
       );
       this.data = data.map((item, index) => ({
         ...item,
