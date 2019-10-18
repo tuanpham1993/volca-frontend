@@ -32,7 +32,7 @@ spec:
   selector:
     app: volca-frontend
   ports:
-  - name: http
-    port: 80
+  - name: https
+    port: 443
     protocol: TCP
-    targetPort: 80
+    targetPort: 443
