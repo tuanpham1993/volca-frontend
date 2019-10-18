@@ -7,6 +7,8 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - run: echo $SSL_CERT | tr '$' '\n' > ./cert.pem
+      - run: echo $SSL_PRIVATE_KEY | tr '$' '\n' > ./private.pem
       - run: echo $DOCKER_HUB_ACCESS_TOKEN | docker login --username tuanpa1993 --password-stdin
       - run: docker build -t tuanpa1993/volca-frontend:latest -t tuanpa1993/volca-frontend:$CIRCLE_SHA1 .
       - run: docker push tuanpa1993/volca-frontend:latest
