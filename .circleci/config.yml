@@ -6,7 +6,6 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - run: yarn && yarn build
       - setup_remote_docker
       - run: echo $DOCKER_HUB_ACCESS_TOKEN | docker login --username tuanpa1993 --password-stdin
       - run: docker build -t tuanpa1993/volca-frontend:latest -t tuanpa1993/volca-frontend:$CIRCLE_SHA1 .

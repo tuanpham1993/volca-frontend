@@ -1,9 +1,19 @@
+FROM node:10-alpine AS builder
+
+COPY . /app/
+
+WORKDIR /app
+
+RUN ["yarn"]
+
+RUN ["yarn", "build"]
+
+#------------------------------------------------------
+
 FROM nginx:1.17-alpine
 
-COPY . .
+RUN ["mkdir", "-p", "/www/volca/dist"]
 
-RUN ["mkdir", "-p", "/www/volca"]
+COPY --from=builder /app/dist /www/volca/dist
 
-RUN ["cp", "-r", "./dist", "/www/volca/"]
-
-RUN ["cp", "./nginx.conf", "/etc/nginx/nginx.conf"]
+COPY --from=builder /app/nginx.conf /etc/nginx/nginx.conf
