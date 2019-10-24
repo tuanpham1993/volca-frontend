@@ -2,11 +2,17 @@
   <q-page>
     <div class="row">
       <div class="col-2">
-        <q-input bottom-slots v-model="newWord" label="New" counter>
+        <q-input bottom-slots v-model="newWord" label="New word" counter>
           <template v-slot:after>
             <q-btn round dense flat icon="send" @click="addWord" />
           </template>
         </q-input>
+        <q-input bottom-slots v-model="newUser" label="New user" counter>
+          <template v-slot:after>
+            <q-btn round dense flat icon="send" @click="addUser" />
+          </template>
+        </q-input>
+        <q-select v-model="user" :options="users" label="User" @input="loadWord" />
       </div>
       <div class="col-10">
         <!-- <q-toggle v-model="forgotten" label="Forgotten" color="yellow" />
@@ -56,7 +62,7 @@
 export default {
   name: "PageIndex",
   data() {
-    this.loadWord();
+    this.getUsers();
 
     return {
       pagination: {
@@ -97,21 +103,42 @@ export default {
       data: [],
       newWord: "",
       forgotten: false,
-      ignored: false
+      ignored: false,
+      users: [],
+      user: null,
+      newUser: ""
     };
   },
   methods: {
     async addWord() {
       if (this.newWord) {
         try {
-          await this.$axios.post("http://api.volca.tuanpa.wtf/words", {
-            word: this.newWord
-          });
+          await this.$axios.post(
+            "http://api.volca.tuanpa.wtf/words",
+            {
+              word: this.newWord
+            },
+            {
+              headers: {
+                Authorization: this.user
+              }
+            }
+          );
 
           this.newWord = "";
+          this.$q.notify({
+            message: "Success!",
+            color: "purple",
+            position: "top-right"
+          });
           await this.loadWord();
         } catch (err) {
-          alert("Exists or something went wrong");
+          console.log(err);
+          this.$q.notify({
+            message: "Exists or something went wrong",
+            color: "red",
+            position: "top-right"
+          });
         }
       }
     },
@@ -119,7 +146,10 @@ export default {
       const { data } = await this.$axios.get(
         "http://api.volca.tuanpa.wtf/words",
         {
-          params: {}
+          params: {},
+          headers: {
+            Authorization: this.user
+          }
         }
       );
       this.data = data.map((item, index) => ({
@@ -133,13 +163,60 @@ export default {
         `http://api.volca.tuanpa.wtf/words/${id}/rate`,
         {
           rating: newRate
+        },
+        {
+          headers: {
+            Authorization: this.user
+          }
         }
       );
     },
     async saveNote(id, note) {
-      await this.$axios.post(`http://api.volca.tuanpa.wtf/words/${id}/note`, {
-        note
-      });
+      await this.$axios.post(
+        `http://api.volca.tuanpa.wtf/words/${id}/note`,
+        {
+          note
+        },
+        {
+          headers: {
+            Authorization: this.user
+          }
+        }
+      );
+    },
+    async addUser() {
+      if (this.newUser) {
+        try {
+          await this.$axios.post("http://api.volca.tuanpa.wtf/users", {
+            username: this.newUser
+          });
+
+          this.user = this.newUser;
+          this.newUser = "";
+          this.$q.notify({
+            message: "Success!",
+            color: "purple",
+            position: "top-right"
+          });
+          await this.getUsers();
+        } catch (err) {
+          console.log(err);
+          this.$q.notify({
+            message: "Exists or something went wrong",
+            color: "red",
+            position: "top-right"
+          });
+        }
+      }
+    },
+    async getUsers() {
+      const { data } = await this.$axios.get(
+        "http://api.volca.tuanpa.wtf/users"
+      );
+
+      this.users = data.map(({ username }) => username);
+      this.user = this.users[0];
+      await this.loadWord();
     }
   }
 };
