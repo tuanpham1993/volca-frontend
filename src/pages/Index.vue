@@ -1,7 +1,11 @@
 <template>
   <q-page>
     <div class="row">
-      <div class="col-2">
+      <div class="col-2 q-pa-sm">
+        <a
+          target="_blank"
+          href="https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb/RK%3D2/RS%3DBBFW_pnWkPY0xPMYsAZI5xOgQEE-"
+        >Google Translate Extension</a>
         <q-input bottom-slots v-model="newWord" label="New word" counter>
           <template v-slot:after>
             <q-btn round dense flat icon="send" @click="addWord" />
@@ -50,7 +54,9 @@
                   <q-editor v-model="props.row.note" min-height="5rem" autofocus @keyup.enter.stop />
                 </q-popup-edit>
               </q-td>
-              <q-td>foo</q-td>
+              <q-td key="action">
+                <q-btn round color="deep-orange" icon="delete" @click="deleteWord(props.row.id)" />
+              </q-td>
             </q-tr>
           </template>
         </q-table>
@@ -99,6 +105,11 @@ export default {
           label: "Note",
           align: "left",
           field: row => row.note
+        },
+        {
+          name: "action",
+          label: "Action",
+          align: "center"
         }
       ],
       data: [],
@@ -157,6 +168,23 @@ export default {
         index,
         newRate: 0
       }));
+    },
+    async deleteWord(id) {
+      try {
+        await this.$axios.delete(`http://api.volca.tuanpa.wtf/words/${id}`);
+        this.$q.notify({
+          message: "The word was deleted!",
+          color: "green",
+          position: "top-right"
+        });
+        this.data = this.data.filter(({ id: wordId }) => wordId !== id);
+      } catch (err) {
+        this.$q.notify({
+          message: "Something went wrong",
+          color: "red",
+          position: "top-right"
+        });
+      }
     },
     async rate(id, newRate) {
       await this.$axios.post(
