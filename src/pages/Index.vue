@@ -50,6 +50,7 @@
                   <q-editor v-model="props.row.note" min-height="5rem" autofocus @keyup.enter.stop />
                 </q-popup-edit>
               </q-td>
+              <q-td>foo</q-td>
             </q-tr>
           </template>
         </q-table>
@@ -133,7 +134,6 @@ export default {
           });
           await this.loadWord();
         } catch (err) {
-          console.log(err);
           this.$q.notify({
             message: "Exists or something went wrong",
             color: "red",
@@ -200,7 +200,6 @@ export default {
           });
           await this.getUsers();
         } catch (err) {
-          console.log(err);
           this.$q.notify({
             message: "Exists or something went wrong",
             color: "red",
