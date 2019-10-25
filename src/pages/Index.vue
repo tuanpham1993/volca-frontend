@@ -1,11 +1,16 @@
 <template>
   <q-page>
+    <q-dialog v-model="longman" full-width full-height>
+      <q-card style="width: 700px; max-width: 80vw;">
+        <iframe width="100%" height="100%" :src="longmanUrl"></iframe>
+
+        <q-card-actions align="right" class="bg-white text-teal">
+          <q-btn flat label="OK" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <div class="row">
       <div class="col-2 q-pa-sm">
-        <a
-          target="_blank"
-          href="https://chrome.google.com/webstore/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb/RK%3D2/RS%3DBBFW_pnWkPY0xPMYsAZI5xOgQEE-"
-        >Google Translate Extension</a>
         <q-input bottom-slots v-model="newWord" label="New word" counter>
           <template v-slot:after>
             <q-btn round dense flat icon="send" @click="addWord" />
@@ -44,6 +49,16 @@
                   @input="rate(props.row.id, props.row.newRate)"
                 />
               </q-td>
+              <q-td key="action">
+                <q-btn
+                  class="q-mr-sm"
+                  round
+                  color="deep-orange"
+                  icon="delete"
+                  @click="deleteWord(props.row.id)"
+                />
+                <q-btn round color="green" icon="web" @click="openLongMan(props.row.word)" />
+              </q-td>
               <q-td>
                 <div v-html="props.row.note"></div>
                 <q-popup-edit
@@ -53,9 +68,6 @@
                 >
                   <q-editor v-model="props.row.note" min-height="5rem" autofocus @keyup.enter.stop />
                 </q-popup-edit>
-              </q-td>
-              <q-td key="action">
-                <q-btn round color="deep-orange" icon="delete" @click="deleteWord(props.row.id)" />
               </q-td>
             </q-tr>
           </template>
@@ -101,15 +113,15 @@ export default {
           align: "left"
         },
         {
+          name: "action",
+          label: "Action",
+          align: "center"
+        },
+        {
           name: "note",
           label: "Note",
           align: "left",
           field: row => row.note
-        },
-        {
-          name: "action",
-          label: "Action",
-          align: "center"
         }
       ],
       data: [],
@@ -118,10 +130,17 @@ export default {
       ignored: false,
       users: [],
       user: null,
-      newUser: ""
+      newUser: "",
+      longman: false,
+      longmanBaseUrl: "https://dictionary.cambridge.org/vi/dictionary/english",
+      longmanUrl: ""
     };
   },
   methods: {
+    openLongMan(word) {
+      this.longmanUrl = `${this.longmanBaseUrl}/${word}`;
+      this.longman = true;
+    },
     async addWord() {
       if (this.newWord) {
         try {
